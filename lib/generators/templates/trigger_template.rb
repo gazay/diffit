@@ -4,8 +4,8 @@ CREATE FUNCTION diff_#{function_name}_fun(record_id int, _value hstore)
 BEGIN
   DELETE FROM column_diffs
   WHERE table_name = #{table_name} AND column_name = #{column_name} AND record_id = #{record_id};
-  INSERT INTO column_diffs (record_id, table_name, column_name, value)
-  VALUES (record_id, #{table_name}, #{column_name}, _value);
+  INSERT INTO column_diffs (record_id, table_name, column_name, value, changed_at)
+  VALUES (record_id, #{table_name}, #{column_name}, _value, current_time);
 END;
 
 CREATE TRIGGER diff_#{function_name}_trigger
