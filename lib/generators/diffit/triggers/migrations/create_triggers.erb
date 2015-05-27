@@ -1,0 +1,32 @@
+class Create<%= Diffit.function_name.to_s.camelize %>TriggersOn<%= table_name.camelize %> < ActiveRecord::Migration
+  def up
+
+    execute <<-SQL
+      CREATE TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_insert_trigger
+      AFTER INSERT ON <%= table_name %>
+      FOR EACH ROW
+      EXECUTE PROCEDURE <%= Diffit.function_name %>();
+    SQL
+
+    execute <<-SQL
+      CREATE TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_update_trigger
+      AFTER UPDATE ON <%= table_name %>
+      FOR EACH ROW
+      WHEN (OLD.* IS DISTINCT FROM NEW.*)
+      EXECUTE PROCEDURE <%= Diffit.function_name %>();
+    SQL
+
+  end
+
+  def down
+
+    execute <<-SQL
+      DROP TRIGGER trigger_<%= Diffit.function_name %>_on_<%= table_name %>_insert_trigger ON <%= table_name %>;
+    SQL
+
+    execute <<-SQL
+      DROP TRIGGER trigger_<%= Diffit.function_name %>_on_<%= table_name %>_update_trigger ON <%= table_name %>;
+    SQL
+
+  end
+end
