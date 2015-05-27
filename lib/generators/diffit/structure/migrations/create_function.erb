@@ -12,96 +12,83 @@ class Create<%= Diffit.function_name.to_s.camelize %> < ActiveRecord::Migration
       BEGIN
 
         t := current_timestamp;
-
-        -- on UPDATE
+        n := row_to_json(NEW);
 
         IF (TG_OP = 'UPDATE') THEN
-
-          -- convert OLD and NEW into JSON
-
-          n := row_to_json(NEW);
           o := row_to_json(OLD);
-
-          -- select attributes (without pkeys)
-
-          FOR a IN SELECT
-            pga.attname AS name
-          FROM pg_attribute pga
-          LEFT JOIN pg_index pgi ON pgi.indrelid = pga.attrelid AND pga.attnum = ANY(pgi.indkey)
-          WHERE pga.attnum > 0 AND
-                pgi.indisprimary IS NOT true AND
-                pga.attrelid = TG_TABLE_NAME::regclass AND
-                NOT pga.attisdropped
-          ORDER BY pga.attnum
-          LOOP
-
-            IF (n->(a.name))::text IS DISTINCT FROM (o->(a.name))::text THEN
-
-              -- UPSERT
-
-              UPDATE <%= Diffit.table_name %>
-              SET
-                value       = n->(a.name),
-                changed_at  = t
-              WHERE
-                table_name  = TG_TABLE_NAME AND
-                record_id   = NEW.id AND
-                column_name = a.name;
-
-              IF NOT FOUND THEN
-
-                BEGIN
-
-                  INSERT INTO <%= Diffit.table_name %>
-                    (table_name, record_id, column_name, value, changed_at)
-                  VALUES
-                    (TG_TABLE_NAME, NEW.id, a.name, n->(a.name), t);
-
-                EXCEPTION WHEN OTHERS THEN
-
-                  UPDATE <%= Diffit.table_name %>
-                  SET
-                    value       = n->(a.name),
-                    changed_at  = t
-                  WHERE
-                    table_name  = TG_TABLE_NAME AND
-                    record_id   = NEW.id AND
-                    column_name = a.name;
-
-                END;
-              END IF;
-            END IF;
-          END LOOP;
-
-          RETURN NEW;
-
-        -- on INSERT
-
-        ELSIF (TG_OP = 'INSERT') THEN
-
-          n := row_to_json(NEW);
-
-          FOR a IN SELECT
-            pga.attname AS name
-          FROM pg_attribute pga
-          LEFT JOIN pg_index pgi ON pgi.indrelid = pga.attrelid AND pga.attnum = ANY(pgi.indkey)
-          WHERE pga.attnum > 0 AND
-                pgi.indisprimary IS NOT true AND
-                pga.attrelid = TG_TABLE_NAME::regclass AND
-                NOT pga.attisdropped
-          ORDER BY pga.attnum
-          LOOP
-
-            INSERT INTO <%= Diffit.table_name %>
-              (table_name, record_id, column_name, value, changed_at)
-            VALUES
-              (TG_TABLE_NAME, NEW.id, a.name, n->(a.name), t);
-
-          END LOOP;
-
-          RETURN NEW;
-
         END IF;
+
+        -- select attributes (without pkeys)
+
+        FOR a IN SELECT
+          pga.attname AS name
+        FROM pg_attribute pga
+        LEFT JOIN pg_index pgi ON pgi.indrelid = pga.attrelid AND pga.attnum = ANY(pgi.indkey)
+        WHERE pga.attnum > 0 AND
+              pgi.indisprimary IS NOT true AND
+              pga.attrelid = TG_TABLE_NAME::regclass AND
+              NOT pga.attisdropped
+        ORDER BY pga.attnum
+        LOOP
+
+          IF (TG_OP = 'UPDATE' AND (n->(a.name))::text IS DISTINCT FROM (o->(a.name))::text) OR (TG_OP = 'INSERT') THEN
+
+            -- UPSERT
+
+            UPDATE <%= Diffit.table_name %>
+            SET
+              value       = n->(a.name),
+              changed_at  = t
+            WHERE
+              table_name  = TG_TABLE_NAME AND
+              record_id   = NEW.id AND
+              column_name = a.name;
+
+            IF NOT FOUND THEN
+
+              BEGIN
+
+                INSERT INTO <%= Diffit.table_name %>
+                  (table_name, record_id, column_name, value, changed_at)
+                VALUES
+                  (TG_TABLE_NAME, NEW.id, a.name, n->(a.name), t);
+
+              EXCEPTION
+              WHEN unique_violation THEN
+
+                -- handle unique violation (constraint: table_name, record_id, column_name)
+                -- TODO: notice
+                -- CHEKME
+
+                UPDATE <%= Diffit.table_name %>
+                SET
+                  value       = n->(a.name),
+                  changed_at  = t
+                WHERE
+                  table_name  = TG_TABLE_NAME AND
+                  record_id   = NEW.id AND
+                  column_name = a.name;
+
+              WHEN OTHERS THEN
+
+                -- TODO: notice
+
+                UPDATE <%= Diffit.table_name %>
+                SET
+                  value       = n->(a.name),
+                  changed_at  = t
+                WHERE
+                  table_name  = TG_TABLE_NAME AND
+                  record_id   = NEW.id AND
+                  column_name = a.name;
+
+              END;
+            END IF;
+          END IF;
+        END LOOP;
+
+        RETURN NEW;
+
       END;
       $$ LANGUAGE plpgsql;
     SQL
