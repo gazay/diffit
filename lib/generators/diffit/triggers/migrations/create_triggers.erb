@@ -21,11 +21,11 @@ class Create<%= Diffit.function_name.to_s.camelize %>TriggersOn<%= table_name.ca
   def down
 
     execute <<-SQL
-      DROP TRIGGER trigger_<%= Diffit.function_name %>_on_<%= table_name %>_insert_trigger ON <%= table_name %>;
+      DROP TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_insert_trigger ON <%= table_name %>;
     SQL
 
     execute <<-SQL
-      DROP TRIGGER trigger_<%= Diffit.function_name %>_on_<%= table_name %>_update_trigger ON <%= table_name %>;
+      DROP TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_update_trigger ON <%= table_name %>;
     SQL
 
   end
