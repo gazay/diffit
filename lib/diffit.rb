@@ -1,5 +1,4 @@
 require 'diffit/version'
-require 'diffit/railtie'
 
 module Diffit
   extend ActiveSupport::Autoload
@@ -8,7 +7,6 @@ module Diffit
   autoload :Record
   autoload :Tracker
   autoload :Trackable
-  autoload :DSL
 
   mattr_accessor :function_name
   @@function_name = :diffit_function
