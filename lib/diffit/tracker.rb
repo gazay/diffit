@@ -119,7 +119,7 @@ module Diffit
       sanitized = relation.except(:select, :order, :group, :having, :includes).select(:id)
 
       query = table.
-        where(table[:changed_at].gteq(@timestamp)).
+        where(table[:changed_at].gteq(self.timestamp)).
         where(table[:table_name].eq(relation.table_name)).
         order(:table_name, :record_id)
 
@@ -127,7 +127,7 @@ module Diffit
         query = query.where(table[:record_id].in(Arel.sql(sanitized.to_sql)))
       end
 
-      query = query.project(:record_id, table[:column_name], table[:value], table[:changed_at])
+      query = query.project(table[:record_id], table[:column_name], table[:value], table[:changed_at])
 
       execute_query(query)
     end
