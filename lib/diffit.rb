@@ -14,6 +14,9 @@ module Diffit
   mattr_accessor :table_name
   @@table_name = :diffit_column_diffs
 
+  mattr_accessor :strategy
+  @@strategy = :join
+
   def self.configure
     yield self
   end

@@ -13,7 +13,7 @@ module Diffit
       if timestamp.respond_to?(:to_datetime)
         @timestamp = timestamp.to_datetime
       elsif timestamp.respond_to?(:to_i)
-        @timestamp = Time.at(@timestamp.to_i).to_datetime
+        @timestamp = Time.at(timestamp.to_i).to_datetime
       else
         raise ArgumentError, "#{timestamp.inspect} is not a timestamp!"
       end
@@ -31,7 +31,7 @@ module Diffit
     # Appends provided objects.
     #
     # @param object [ActiveRecord::Relation, ActiveRecord::Base, Array(ActiveRecord::Base), Array(ActiveRecord::Relation)]
-    # @return [Diffit::Tracker] new instance of `Diffit::Tracker`.
+    # @return [Diffit::Tracker] new instance of Diffit::Tracker.
     def append(*objects)
       copy = self.clone
       copy.append!(*objects)
@@ -59,7 +59,7 @@ module Diffit
 
     # Appends all changes.
     #
-    # @return [Diffit::Tracker] a new instance of `Diffit::Tracker`.
+    # @return [Diffit::Tracker] a new instance of Diffit::Tracker.
     def all
       copy = self.clone
       copy.all!
@@ -85,7 +85,12 @@ module Diffit
           @changes.append object.model_name.name, handle_one(object)
         elsif relation?(object)
           model = object.respond_to?(:model) ? object.model : object.class
-          @changes.append model.name, handle_relation(object)
+          changes = case Diffit.strategy
+                    when :join     then handle_relation_with_join(object)
+                    when :subquery then handle_relation_with_subquery(object)
+                    end
+
+          @changes.append model.name, changes
         end
       end
 
@@ -108,7 +113,26 @@ module Diffit
       object.is_a?(ActiveRecord::Base)
     end
 
-    def handle_relation(relation)
+    def handle_relation_with_subquery(relation)
+      table = Arel::Table.new(Diffit.table_name)
+
+      sanitized = relation.except(:select, :order, :group, :having, :includes).select(:id)
+
+      query = table.
+        where(table[:changed_at].gteq(@timestamp)).
+        where(table[:table_name].eq(relation.table_name)).
+        order(:table_name, :record_id)
+
+      if sanitized.where_values.present? || sanitized.joins_values.present?
+        query = query.where(table[:record_id].in(Arel.sql(sanitized.to_sql)))
+      end
+
+      query = query.project(:record_id, table[:column_name], table[:value], table[:changed_at])
+
+      execute_query(query)
+    end
+
+    def handle_relation_with_join(relation)
       table = Arel::Table.new(Diffit.table_name)
 
       sanitized = relation.except(:select, :order, :group, :having, :includes)
