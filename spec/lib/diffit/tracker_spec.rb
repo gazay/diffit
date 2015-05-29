@@ -119,6 +119,14 @@ describe Diffit::Tracker do
 
     end
 
+    context 'chainable' do
+
+      it { expect(Diffit::Tracker.new(@time1).append(@posts.first).append(@posts.last).length).to eq(8) }
+      it { expect(Diffit::Tracker.new(@time2).append(@posts.first).append(@posts.last).length).to eq(4) }
+      it { expect(Diffit::Tracker.new(@time3).append(@posts.first).append(@posts.last).length).to eq(0) }
+
+    end
+
   end
 
   describe '#all' do

@@ -3,8 +3,7 @@ require 'spec_helper'
 describe Diffit::Trackable do
 
   before do
-    @model = Class.new { extend Diffit::DSL }
-    @model.diffit
+    @model = Class.new { include Diffit::Trackable }
   end
 
   context 'on class-level' do
