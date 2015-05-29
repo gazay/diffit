@@ -1,0 +1,12 @@
+Diffit.configure do |config|
+
+  # A name of the tracking table.
+  config.table_name = :<%= Diffit.table_name %>
+
+  # A name of the stored procedure.
+  config.function_name = :<%= Diffit.function_name %>
+
+  # A strategy to handle relations. Should be one of: [:join, :subquery].
+  config.strategy = :join
+
+end

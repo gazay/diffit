@@ -31,9 +31,5 @@ module Diffit
       say_status '!', message, :red
     end
 
-    def notice(message)
-      say_status '>', message, :green
-    end
-
   end
 end
