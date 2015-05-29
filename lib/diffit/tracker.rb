@@ -2,7 +2,8 @@ module Diffit
   class Tracker
 
     attr_reader :timestamp
-    attr_reader :changes
+
+    delegate :to_h, :to_hash, :to_json, :each, :length, :size, to: :changes
 
     # Instantiates a Diffit::Tracker with provided timestamp.
     #
@@ -17,43 +18,58 @@ module Diffit
         raise ArgumentError, "#{timestamp.inspect} is not a timestamp!"
       end
 
-      @changes = Diffit::Changes.new(@timestamp)
+      @tracked = []
+      @changes = Diffit::Changes.new(self.timestamp)
+      @fetched = false
     end
 
-    delegate :to_h, :to_hash, :to_json, :each, :length, :size, to: :changes
+    def initialize_clone(other)
+      @tracked = Array.new(@tracked)
+      @changes = Diffit::Changes.new(self.timestamp)
+    end
 
-    public
-
-    # Collects changes for provided object.
+    # Appends provided objects.
     #
-    # @param object [ActiveRecord::Relation, Array(ActiveRecord::Base), ActiveRecord::Base]
+    # @param object [ActiveRecord::Relation, ActiveRecord::Base, Array(ActiveRecord::Base), Array(ActiveRecord::Relation)]
+    # @return [Diffit::Tracker] new instance of `Diffit::Tracker`.
+    def append(*objects)
+      copy = self.clone
+      copy.append!(*objects)
+      copy
+    end
+
+    # Appends provided objects to `self`.
+    #
+    # @param object [ActiveRecord::Relation, ActiveRecord::Base, Array(ActiveRecord::Base), Array(ActiveRecord::Relation)]
     # @return [self] self
-    def append(object)
-
-      if object.is_a?(ActiveRecord::Relation) ||
-         ActiveRecord::Base.descendants.include?(object)
-
-        append_relation(object)
-
-      elsif object.respond_to?(:to_a) &&
-            (records = object.to_a).all? { |record| record.is_a?(ActiveRecord::Base) }
-
-        append_many(records)
-
-      elsif object.is_a?(ActiveRecord::Base)
-
-        append_one(object)
-
-      else
-        raise ArgumentError, 'Expected ActiveRecord::Base or ActiveRecord::Relation'
+    def append!(*objects)
+      objects.flatten!
+      objects.each do |object|
+        if accepts?(object)
+          @tracked << object
+        else
+          raise ArgumentError, 'Expected ActiveRecord::Base or ActiveRecord::Relation'
+        end
       end
+
+      @changes.cleanup!
+      @fetched = false
       self
     end
 
-    # Collects all changes.
+    # Appends all changes.
+    #
+    # @return [Diffit::Tracker] a new instance of `Diffit::Tracker`.
+    def all
+      copy = self.clone
+      copy.all!
+      copy
+    end
+
+    # Appends all changes to `self`.
     #
     # @return [self] self.
-    def all
+    def all!
       @changes.cleanup!
       handle_all.group_by { |row| row[:table_name] }.each do |t, records|
         @changes.append t.classify, records
@@ -61,40 +77,36 @@ module Diffit
       self
     end
 
-    protected
+    def changes
+      return @changes if @fetched
 
-    # Collects changes for provided record.
-    #
-    # @param record [ActiveRecord::Base].
-    # @return [self] self.
-    def append_one(record)
-      @changes.append record.model_name.name, handle_one(record)
-      @changes.prepare!
-      self
-    end
+      @tracked.each do |object|
+        if record?(object)
+          @changes.append object.model_name.name, handle_one(object)
+        elsif relation?(object)
+          model = object.respond_to?(:model) ? object.model : object.class
+          @changes.append model.name, handle_relation(object)
+        end
+      end
 
-    # Collects changes for each record in provided collection.
-    #
-    # @param records [Array(ActiveRecord::Base)]
-    # @return [self] self.
-    def append_many(records)
-      records.each { |record| @changes.append record.model_name.name, handle_one(record) }
+      @fetched = true
       @changes.prepare!
-      self
-    end
-
-    # Collects changes for each record mathching conditions of provided relation.
-    #
-    # @param relation [ActiveRecord::Relation].
-    # @return [self] self.
-    def append_relation(relation)
-      klass = relation.respond_to?(:model) ? relation.model : relation
-      @changes.append klass.model_name.name, handle_relation(relation)
-      @changes.prepare!
-      self
+      @changes
     end
 
     private
+
+    def accepts?(object)
+      record?(object) || relation?(object)
+    end
+
+    def relation?(object)
+      object.is_a?(ActiveRecord::Relation) || ActiveRecord::Base.descendants.include?(object)
+    end
+
+    def record?(object)
+      object.is_a?(ActiveRecord::Base)
+    end
 
     def handle_relation(relation)
       table = Arel::Table.new(Diffit.table_name)
@@ -103,12 +115,11 @@ module Diffit
 
       query = sanitized.
         from(table).
-        where(table[:changed_at].gteq(@timestamp)).
+        where(table[:changed_at].gteq(self.timestamp)).
         where(table[:table_name].eq(relation.table_name)).
         select(table[:record_id], table[:column_name], table[:value], table[:changed_at])
 
-      unless sanitized.where_values.blank? &&
-             sanitized.joins_values.blank?
+      if sanitized.where_values.present? || sanitized.joins_values.present?
 
         join_cond = Arel::Nodes::On.new(sanitized.arel_table[:id].eq(table[:record_id]))
         join_arel = Arel::Nodes::InnerJoin.new(sanitized.arel_table, join_cond)
@@ -123,7 +134,7 @@ module Diffit
       table = Arel::Table.new(Diffit.table_name)
 
       query = table.
-        where(table[:changed_at].gteq(@timestamp)).
+        where(table[:changed_at].gteq(self.timestamp)).
         where(table[:table_name].eq(record.class.table_name)).
         where(table[:record_id].eq(record.id)).
         order(:table_name, :record_id).
@@ -136,7 +147,7 @@ module Diffit
       table = Arel::Table.new(Diffit.table_name)
 
       query = table.
-        where(table[:changed_at].gteq(@timestamp)).
+        where(table[:changed_at].gteq(self.timestamp)).
         order(:table_name, :record_id).
         project(table[:table_name], table[:record_id], table[:column_name], table[:value], table[:changed_at])
 
