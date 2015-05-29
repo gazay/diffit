@@ -1,6 +1,6 @@
 class Author < ActiveRecord::Base
 
-  diffit
+  include Diffit::Trackable
 
   ## associations
 

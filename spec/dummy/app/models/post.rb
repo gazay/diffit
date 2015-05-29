@@ -1,6 +1,6 @@
 class Post < ActiveRecord::Base
 
-  diffit
+  include Diffit::Trackable
 
   scope :authored_by, ->(author) { where(author_id: author.id) }
 
