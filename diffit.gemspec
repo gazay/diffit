@@ -12,7 +12,9 @@ Gem::Specification.new do |s|
   s.description = 'Track changes in your tables using PostgreSQL triggers..'
   s.license     = 'MIT'
 
-  s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.rdoc']
+  s.files         = `git ls-files`.split("\n")
+  s.require_paths = ['lib']
+  s.required_ruby_version = '> 2.0.0'
 
   s.add_dependency 'rails', '~> 4.2'
   s.add_dependency 'pg', '~> 0.18'
