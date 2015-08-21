@@ -5,8 +5,8 @@ require 'diffit/version'
 Gem::Specification.new do |s|
   s.name        = 'diffit'
   s.version     = Diffit::VERSION
-  s.authors     = ['Denis Lifanov']
-  s.email       = ['inadsence@gmail.com']
+  s.authors     = ['Denis Lifanov', 'Alexey Gaziev']
+  s.email       = ['inadsence@gmail.com', 'alex.gaziev@gmail.com']
   s.homepage    = 'https://github.com/gazay/diffit'
   s.summary     = 'A simple solution to track changes in your tables.'
   s.description = 'Track changes in your tables using PostgreSQL triggers..'
