@@ -43,9 +43,10 @@ module Diffit
     # @param object [ActiveRecord::Relation, ActiveRecord::Base, Array(ActiveRecord::Base), Array(ActiveRecord::Relation)]
     # @return [self] self
     def append!(*objects)
-      objects.flatten!
       objects.each do |object|
-        if accepts?(object)
+        if object.is_a?(Array)
+          append!(*object)
+        elsif accepts?(object)
           @tracked << object
         else
           raise ArgumentError, 'Expected ActiveRecord::Base or ActiveRecord::Relation'
