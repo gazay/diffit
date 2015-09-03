@@ -36,7 +36,14 @@ module Diffit
     # @param object [ActiveRecord::Relation, ActiveRecord::Base, Array(ActiveRecord::Base), Array(ActiveRecord::Relation)]
     # @return [self] self
     def append!(*objects)
-      @tracked += objects.flatten.map(&Query.method(:build))
+      objects.each do |object|
+        if object.is_a?(Array)
+          append!(*object)
+        else
+          @tracked << Query.build(object)
+        end
+      end
+
       @changes.cleanup!
       @fetched = false
 
