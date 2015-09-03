@@ -1,7 +1,18 @@
 module Diffit
+  # Describes the record of object's changes
   class Record
 
-    attr_reader :model, :record_id, :changes
+    # @!attribute [r] model
+    # @return [Class] the class of the object that has been changed
+    attr_reader :model
+
+    # @!attribute [r] record
+    # @return [Integer] the id of the object that has been changed
+    attr_reader :record_id
+
+    # @!attribute [r] changes
+    # @return [Array<Hash>] the list of changes of the object
+    attr_reader :changes
 
     def initialize(model, record_id, changes)
       @model     = model

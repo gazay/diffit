@@ -12,7 +12,7 @@ module Diffit
     alias :diff_from :changes_since
 
     def changes_since_midnight
-      Diffit::Tracker.new(Time.now.beginning_of_day).append(self)
+      changes_since Time.now.beginning_of_day
     end
 
     alias :diff_from_midnight :changes_since_midnight

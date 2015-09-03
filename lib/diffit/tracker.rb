@@ -16,9 +16,9 @@ module Diffit
       @fetched = false
     end
 
-    def initialize_clone(other)
+    def initialize_clone(_other)
       @tracked = Array.new(@tracked)
-      @changes = Diffit::Changes.new(self.timestamp)
+      @changes = Diffit::Changes.new(timestamp)
     end
 
     # Appends provided objects.
@@ -26,7 +26,7 @@ module Diffit
     # @param object [ActiveRecord::Relation, ActiveRecord::Base, Array(ActiveRecord::Base), Array(ActiveRecord::Relation)]
     # @return [Diffit::Tracker] new instance of Diffit::Tracker.
     def append(*objects)
-      copy = self.clone
+      copy = clone
       copy.append!(*objects)
       copy
     end
@@ -55,8 +55,9 @@ module Diffit
     #
     # @return [Diffit::Tracker] a new instance of Diffit::Tracker.
     def all
-      copy = self.clone
+      copy = clone
       copy.all!
+
       copy
     end
 
