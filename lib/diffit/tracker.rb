@@ -10,14 +10,7 @@ module Diffit
     # @param timestamp [Time, DateTime, Date, Fixnum] date, time or timestamp.
     # @return [Diffit::Tracker] Diffit::Tracker
     def initialize(timestamp)
-      if timestamp.respond_to?(:to_datetime)
-        @timestamp = timestamp.to_datetime
-      elsif timestamp.respond_to?(:to_i)
-        @timestamp = Time.at(timestamp.to_i).to_datetime
-      else
-        raise ArgumentError, "#{timestamp.inspect} is not a timestamp!"
-      end
-
+      @timestamp = Timestamp.new(timestamp)
       @tracked = []
       @changes = Diffit::Changes.new(self.timestamp)
       @fetched = false
