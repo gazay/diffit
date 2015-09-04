@@ -1,5 +1,8 @@
 *.gem
 .bundle/
+.yardopts
+.ruby-version
+.rspec
 Gemfile.lock
 coverage/
 log/*.log
