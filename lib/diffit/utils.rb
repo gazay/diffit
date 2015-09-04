@@ -1,9 +1,7 @@
 # encoding: utf-8
 
 module Diffit
-  # Provides a value converter to datetime
-  #
-  module Timestamp
+  module Utils
     # Converts the argument to a corresponding datetime
     #
     # @param [#to_datetime, #to_i] value
@@ -12,7 +10,7 @@ module Diffit
     #
     # @raise [ArgumentError] in case the argument cannot be converted to data
     #
-    def self.new(value)
+    def self.timestamp(value)
       if value.respond_to?(:to_datetime)
         value.to_datetime
       elsif value.respond_to?(:to_i)

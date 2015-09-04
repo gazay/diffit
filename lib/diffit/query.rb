@@ -60,7 +60,7 @@ module Diffit
 
     # Returns a list of object's changes for given timestamp
     #
-    # @param [Diffit::Timestamp] timestamp
+    # @param [Diffit::Utils#timestamp] timestamp
     #
     # @return [Array<Hash>]
     #

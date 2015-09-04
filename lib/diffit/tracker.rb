@@ -10,7 +10,7 @@ module Diffit
     # @param timestamp [Time, DateTime, Date, Fixnum] date, time or timestamp.
     # @return [Diffit::Tracker] Diffit::Tracker
     def initialize(timestamp)
-      @timestamp = Timestamp.new(timestamp)
+      @timestamp = Utils.timestamp(timestamp)
       @tracked = []
       @changes = Diffit::Changes.new(self.timestamp)
       @fetched = false
