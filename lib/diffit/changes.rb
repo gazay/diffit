@@ -61,7 +61,7 @@ module Diffit
         self.class.to_s,
         self.object_id,
         @timestamp.strftime('%d/%b/%Y:%H:%M:%S %z'),
-        @length
+        length
     end
 
     alias :to_str :to_s
