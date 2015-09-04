@@ -1,9 +1,18 @@
 module Diffit
+
+  # The registry (enumerable collection) of changes with custom timestamp
   class Changes
 
     include Enumerable
 
+    # @!attribute [r] timestamp
+    #
+    # @return [Time, DateTime, Date, Fixnum] the initialized timestamp
     attr_reader :timestamp
+    
+    # @!attribute [r] records
+    #
+    # @return [Array(Diffit::Record)] the list of changes' records
     attr_reader :records
 
     # Instantiates a Diffit::Changes with provided timestamp.
@@ -15,7 +24,7 @@ module Diffit
       @records = []
     end
 
-    # Appends provided data to `self`.
+    # Registers changes of some object in the [#records] list
     #
     # @param model [String] model name.
     # @param data [Array(Hash)] data to append.
@@ -26,13 +35,6 @@ module Diffit
       end
       @length = nil
       self
-    end
-
-    # Are there any changes?
-    #
-    # @return [Boolean] existence of changes.
-    def empty?
-      @records.empty?
     end
 
     # Number of changes.
@@ -47,11 +49,8 @@ module Diffit
     # @return [Enumerator] if no block is given.
     # @return [Array(Diffit::Record)] otherwise
     def each
-      if block_given?
-        @records.each { |c| yield c }
-      else
-        @records.enum_for(:each)
-      end
+      return to_enum unless block_given?
+      records.each { |record| yield record }
     end
 
     # A short `String` representation of `self`.
@@ -71,7 +70,7 @@ module Diffit
     #
     # @return [Hash] the object converted to hash.
     def to_h
-      {timestamp: timestamp.to_i, changes: @records.map(&:to_h)}
+      {timestamp: @timestamp.to_i, changes: @records.map(&:to_h)}
     end
 
     alias :to_hash :to_h

@@ -7,6 +7,13 @@ describe Diffit::Changes do
     @changes = Diffit::Changes.new(@timestamp)
   end
 
+  describe "#timestamp" do
+
+    subject { @changes.timestamp }
+    it { is_expected.to eql @timestamp }
+
+  end # describe #timestamp
+
   describe "#length" do
 
     before do

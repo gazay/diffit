@@ -3,6 +3,8 @@ require 'diffit/version'
 module Diffit
   extend ActiveSupport::Autoload
 
+  autoload :Timestamp
+  autoload :Query
   autoload :Changes
   autoload :Record
   autoload :Tracker
