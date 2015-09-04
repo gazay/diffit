@@ -1,5 +1,7 @@
 # Diffit
 
+[![Build Status](https://travis-ci.org/gazay/diffit.svg)](http://travis-ci.org/gazay/diffit) [![CodeClimate](https://codeclimate.com/github/gazay/diffit/badges/gpa.svg)](https://codeclimate.com/github/gazay/diffit)
+
 A simple solution to track changes in your tables.
 
 > Right now with PostgreSQL support only
