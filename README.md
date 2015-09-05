@@ -22,9 +22,15 @@ A simple solution to track changes in your tables.
 
     rails g diffit:init TABLE_NAME
 
-Creates `initializer` in which you can put names of tracking table and stored procedure as well as triggers for `INSERT` and `UPDATE` actions on corresponding table.
+Creates `initializer` in which you can put names of tracking table and stored procedure.
 
-Assumes it should got real table name. Otherwise attempts to get a table name from corresponding class.
+### Triggers migration
+
+    rails g diffit:triggers TABLE_NAME
+
+Creates triggers for `INSERT` and `UPDATE` actions on corresponding table.
+Assumes it should got real table name.
+Otherwise attempts to get a table name from corresponding class.
 
 ## In your app
 
