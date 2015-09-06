@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+require 'rspec/rails'
 require 'ammeter/init'
 require 'generators/diffit/init/init_generator'
 
