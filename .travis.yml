@@ -11,3 +11,6 @@ matrix:
     - rvm: rbx
 addons:
   postgresql: "9.4"
+
+before_script:
+  - ( cd spec/dummy; rake db:create RAILS_ENV=test; rake db:migrate RAILS_ENV=test )
