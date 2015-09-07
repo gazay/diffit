@@ -17,9 +17,9 @@ describe Diffit::Changes do
   describe "#length" do
 
     before do
-      @changes.append('Author', [{record_id: 42, column_name: 'rating', value: 1, changed_at: 3.days.ago}])
-      @changes.append('Author', [{record_id: 43, column_name: 'rating', value: 2, changed_at: 3.days.ago}])
-      @changes.append('Author', [{record_id: 44, column_name: 'rating', value: 3, changed_at: 3.days.ago}])
+      @changes.append('Author', [{diffable_id: 42, column_name: 'rating', value: 1, changed_at: 3.days.ago}])
+      @changes.append('Author', [{diffable_id: 43, column_name: 'rating', value: 2, changed_at: 3.days.ago}])
+      @changes.append('Author', [{diffable_id: 44, column_name: 'rating', value: 3, changed_at: 3.days.ago}])
     end
 
     subject { @changes.length }
@@ -43,9 +43,9 @@ describe Diffit::Changes do
 
       before do
         @changes.append('Author', [
-          {record_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days},
-          {record_id: 42, column_name: 'last_name',  value: 'L', changed_at: @timestamp + 2.days},
-          {record_id: 42, column_name: 'rating',     value: 123, changed_at: @timestamp + 3.days}
+          {diffable_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days},
+          {diffable_id: 42, column_name: 'last_name',  value: 'L', changed_at: @timestamp + 2.days},
+          {diffable_id: 42, column_name: 'rating',     value: 123, changed_at: @timestamp + 3.days}
         ])
       end
 
@@ -59,7 +59,7 @@ describe Diffit::Changes do
         subject { @changes.to_h[:changes].first }
 
         it { expect(subject[:model]).to eq('Author') }
-        it { expect(subject[:record_id]).to eq(42) }
+        it { expect(subject[:diffable_id]).to eq(42) }
         it { expect(subject[:changes].length).to eq(3) }
         it { expect(subject[:changes]).to include Hash[:changed_at, @timestamp + 2.days, :column_name, 'first_name', :value, 'F'] }
         it { expect(subject[:changes]).to include Hash[:changed_at, @timestamp + 2.days, :column_name, 'last_name',  :value, 'L'] }
@@ -72,8 +72,8 @@ describe Diffit::Changes do
   describe '#prepare!' do
 
     before do
-      @changes.append('Author', [{record_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
-      @changes.append('Author', [{record_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
+      @changes.append('Author', [{diffable_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
+      @changes.append('Author', [{diffable_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
     end
 
     before do
@@ -88,8 +88,8 @@ describe Diffit::Changes do
   describe '#cleanup!' do
 
     before do
-      @changes.append('Author', [{record_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
-      @changes.append('Author', [{record_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
+      @changes.append('Author', [{diffable_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
+      @changes.append('Author', [{diffable_id: 42, column_name: 'first_name', value: 'F', changed_at: @timestamp + 2.days}])
     end
 
     before do
