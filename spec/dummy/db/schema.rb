@@ -30,16 +30,16 @@ ActiveRecord::Schema.define(version: 6) do
   end
 
   create_table "tracked_changes", force: :cascade do |t|
-    t.string   "table_name"
-    t.integer  "record_id"
+    t.integer  "diffable_id"
+    t.string   "diffable_type"
     t.string   "column_name"
     t.json     "value"
     t.datetime "changed_at"
   end
 
   add_index "tracked_changes", ["changed_at"], name: "index_tracked_changes_on_changed_at", using: :btree
-  add_index "tracked_changes", ["record_id"], name: "index_tracked_changes_on_record_id", using: :btree
-  add_index "tracked_changes", ["table_name", "record_id", "column_name"], name: "record_identifiers", unique: true, using: :btree
-  add_index "tracked_changes", ["table_name"], name: "index_tracked_changes_on_table_name", using: :btree
+  add_index "tracked_changes", ["diffable_id"], name: "index_tracked_changes_on_diffable_id", using: :btree
+  add_index "tracked_changes", ["diffable_type", "diffable_id", "column_name"], name: "record_identifiers", unique: true, using: :btree
+  add_index "tracked_changes", ["diffable_type"], name: "index_tracked_changes_on_diffable_type", using: :btree
 
 end

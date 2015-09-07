@@ -5,7 +5,7 @@ class CreateTrackedChangesFunctionTriggersOnPosts < ActiveRecord::Migration
       CREATE TRIGGER tracked_changes_function_on_posts_insert_trigger
       AFTER INSERT ON posts
       FOR EACH ROW
-      EXECUTE PROCEDURE tracked_changes_function();
+      EXECUTE PROCEDURE tracked_changes_function('Post');
     SQL
 
     execute <<-SQL
@@ -13,7 +13,7 @@ class CreateTrackedChangesFunctionTriggersOnPosts < ActiveRecord::Migration
       AFTER UPDATE ON posts
       FOR EACH ROW
       WHEN (OLD.* IS DISTINCT FROM NEW.*)
-      EXECUTE PROCEDURE tracked_changes_function();
+      EXECUTE PROCEDURE tracked_changes_function('Post');
     SQL
 
   end

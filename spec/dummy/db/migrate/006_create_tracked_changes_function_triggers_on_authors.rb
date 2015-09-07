@@ -5,7 +5,7 @@ class CreateTrackedChangesFunctionTriggersOnAuthors < ActiveRecord::Migration
       CREATE TRIGGER tracked_changes_function_on_authors_insert_trigger
       AFTER INSERT ON authors
       FOR EACH ROW
-      EXECUTE PROCEDURE tracked_changes_function();
+      EXECUTE PROCEDURE tracked_changes_function('Author');
     SQL
 
     execute <<-SQL
@@ -13,7 +13,7 @@ class CreateTrackedChangesFunctionTriggersOnAuthors < ActiveRecord::Migration
       AFTER UPDATE ON authors
       FOR EACH ROW
       WHEN (OLD.* IS DISTINCT FROM NEW.*)
-      EXECUTE PROCEDURE tracked_changes_function();
+      EXECUTE PROCEDURE tracked_changes_function('Author');
     SQL
 
   end
