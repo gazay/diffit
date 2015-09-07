@@ -20,8 +20,8 @@ module Diffit
       def query(timestamp)
         table
           .where(table[:changed_at].gteq(timestamp))
-          .order(:table_name, :record_id)
-          .project(table[:table_name], table[:record_id], table[:column_name], table[:value], table[:changed_at])
+          .order(:diffable_type, :diffable_id)
+          .project(table[:diffable_type], table[:diffable_id], table[:column_name], table[:value], table[:changed_at])
       end
 
     end # class Join

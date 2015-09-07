@@ -9,7 +9,7 @@ module Diffit
     #
     # @return [Time, DateTime, Date, Fixnum] the initialized timestamp
     attr_reader :timestamp
-    
+
     # @!attribute [r] records
     #
     # @return [Array(Diffit::Record)] the list of changes' records
@@ -30,8 +30,8 @@ module Diffit
     # @param data [Array(Hash)] data to append.
     # @return [self] self
     def append(model, data)
-      data.group_by { |row| row[:record_id] }.each do |record_id, changes|
-        @records << Record.new(model, record_id, changes.map { |c| c.slice(:column_name, :value, :changed_at)})
+      data.group_by { |row| row[:diffable_id] }.each do |diffable_id, changes|
+        @records << Record.new(model, diffable_id, changes.map { |c| c.slice(:column_name, :value, :changed_at)})
       end
       @length = nil
       self
@@ -84,7 +84,7 @@ module Diffit
 
     def prepare!
       @records.sort_by! { |record| record.last_changed_at }
-      @records.uniq! { |record| [record.model, record.record_id] }
+      @records.uniq! { |record| [record.model, record.diffable_id] }
       nil
     end
 

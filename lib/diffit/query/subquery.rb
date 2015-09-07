@@ -17,20 +17,24 @@ module Diffit
           object.except(:select, :order, :group, :having, :includes).select(:id)
       end
 
+      def name
+        object.model_name.name
+      end
+
       private
 
       def query(timestamp)
         query =
           table
           .where(table[:changed_at].gteq(timestamp))
-          .where(table[:table_name].eq(object.table_name))
-          .order(:table_name, :record_id)
+          .where(table[:diffable_type].eq(name))
+          .order(:table_name, :diffable_id)
 
         if joins_present?
-          query = query.where(table[:record_id].in(Arel.sql(sanitized.to_sql)))
+          query = query.where(table[:diffable_id].in(Arel.sql(sanitized.to_sql)))
         end
 
-        query.project(table[:record_id], table[:column_name], table[:value], table[:changed_at])
+        query.project(table[:diffable_id], table[:column_name], table[:value], table[:changed_at])
       end
 
       def joins_present?

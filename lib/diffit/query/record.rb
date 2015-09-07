@@ -19,14 +19,10 @@ module Diffit
       def query(timestamp)
         table
           .where(table[:changed_at].gteq(timestamp))
-          .where(table[:table_name].eq(table_name))
-          .where(table[:record_id].eq(id))
-          .order(:table_name, :record_id)
-          .project(table[:record_id], table[:column_name], table[:value], table[:changed_at])
-      end
-
-      def table_name
-        object.class.table_name
+          .where(table[:diffable_type].eq(name))
+          .where(table[:diffable_id].eq(id))
+          .order(:diffable_type, :diffable_id)
+          .project(table[:diffable_id], table[:column_name], table[:value], table[:changed_at])
       end
 
       def id

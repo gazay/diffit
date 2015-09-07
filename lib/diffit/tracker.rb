@@ -68,7 +68,7 @@ module Diffit
       Query::All
         .new
         .call(timestamp)
-        .group_by { |row| row[:table_name] }
+        .group_by { |row| row[:diffable_type] }
         .each { |t, records| @changes.append t.classify, records }
 
       self

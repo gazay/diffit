@@ -8,16 +8,16 @@ module Diffit
 
     # @!attribute [r] record
     # @return [Integer] the id of the object that has been changed
-    attr_reader :record_id
+    attr_reader :diffable_id
 
     # @!attribute [r] changes
     # @return [Array<Hash>] the list of changes of the object
     attr_reader :changes
 
-    def initialize(model, record_id, changes)
-      @model     = model
-      @record_id = record_id
-      @changes   = changes
+    def initialize(model, diffable_id, changes)
+      @model       = model
+      @diffable_id = diffable_id
+      @changes     = changes
     end
 
     # Timestamp of the latest change.
@@ -31,7 +31,7 @@ module Diffit
     #
     # @return [Hash] the object converted to hash.
     def to_h
-      {model: model, record_id: record_id, changes: changes}
+      {model: model, diffable_id: diffable_id, changes: changes}
     end
 
   end
