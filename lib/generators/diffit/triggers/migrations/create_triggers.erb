@@ -1,19 +1,19 @@
-class Create<%= Diffit.function_name.to_s.camelize %>TriggersOn<%= table_name.camelize %> < ActiveRecord::Migration
+class Create<%= Diffit.function_name.to_s.camelize %>TriggersOn<%= @model.name.pluralize %> < ActiveRecord::Migration
   def up
 
     execute <<-SQL
-      CREATE TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_insert_trigger
-      AFTER INSERT ON <%= table_name %>
+      CREATE TRIGGER <%= Diffit.function_name %>_on_<%= @model.table_name %>_insert_trigger
+      AFTER INSERT ON <%= @model.table_name %>
       FOR EACH ROW
-      EXECUTE PROCEDURE <%= Diffit.function_name %>();
+      EXECUTE PROCEDURE <%= Diffit.function_name %>('<%= @model.name %>');
     SQL
 
     execute <<-SQL
-      CREATE TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_update_trigger
-      AFTER UPDATE ON <%= table_name %>
+      CREATE TRIGGER <%= Diffit.function_name %>_on_<%= @model.table_name %>_update_trigger
+      AFTER UPDATE ON <%= @model.table_name %>
       FOR EACH ROW
       WHEN (OLD.* IS DISTINCT FROM NEW.*)
-      EXECUTE PROCEDURE <%= Diffit.function_name %>();
+      EXECUTE PROCEDURE <%= Diffit.function_name %>('<%= @model.name %>');
     SQL
 
   end
@@ -21,11 +21,11 @@ class Create<%= Diffit.function_name.to_s.camelize %>TriggersOn<%= table_name.ca
   def down
 
     execute <<-SQL
-      DROP TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_insert_trigger ON <%= table_name %>;
+      DROP TRIGGER <%= Diffit.function_name %>_on_<%= @model.table_name %>_insert_trigger ON <%= @model.table_name %>;
     SQL
 
     execute <<-SQL
-      DROP TRIGGER <%= Diffit.function_name %>_on_<%= table_name %>_update_trigger ON <%= table_name %>;
+      DROP TRIGGER <%= Diffit.function_name %>_on_<%= @model.table_name %>_update_trigger ON <%= @model.table_name %>;
     SQL
 
   end
