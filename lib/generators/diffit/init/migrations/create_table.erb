@@ -1,20 +1,19 @@
 class Create<%= Diffit.table_name.to_s.camelize %> < ActiveRecord::Migration
   def up
     create_table :<%= Diffit.table_name %> do |t|
-      t.string :table_name
-      t.integer :record_id
+      t.references :diffable, polymporphic: true
       t.string :column_name
       t.json :value
       t.timestamp :changed_at
     end
 
-    add_index :<%= Diffit.table_name %>, :table_name
-    add_index :<%= Diffit.table_name %>, :record_id
+    add_index :<%= Diffit.table_name %>, :diffable_type
+    add_index :<%= Diffit.table_name %>, :diffable_id
     add_index :<%= Diffit.table_name %>, :changed_at
 
     execute <<-SQL
       ALTER TABLE <%= Diffit.table_name %>
-      ADD CONSTRAINT record_identifiers UNIQUE (table_name, record_id, column_name);
+      ADD CONSTRAINT record_identifiers UNIQUE (diffable_type, diffable_id, column_name);
     SQL
   end
 

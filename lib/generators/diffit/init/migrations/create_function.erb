@@ -8,9 +8,11 @@ class Create<%= Diffit.function_name.to_s.camelize %> < ActiveRecord::Migration
         o   JSON;       -- OLD as JSON
         t   TIMESTAMP;  -- current timestamp
         a   RECORD;     -- attribute
+        d   TEXT;       -- model name
 
       BEGIN
 
+        d := TG_ARGV[0];
         t := current_timestamp;
         n := row_to_json(NEW);
 
@@ -40,23 +42,23 @@ class Create<%= Diffit.function_name.to_s.camelize %> < ActiveRecord::Migration
               value       = n->(a.name),
               changed_at  = t
             WHERE
-              table_name  = TG_TABLE_NAME AND
-              record_id   = NEW.id AND
-              column_name = a.name;
+              diffable_type = d AND
+              diffable_id   = NEW.id AND
+              column_name   = a.name;
 
             IF NOT FOUND THEN
 
               BEGIN
 
                 INSERT INTO <%= Diffit.table_name %>
-                  (table_name, record_id, column_name, value, changed_at)
+                  (diffable_type, diffable_id, column_name, value, changed_at)
                 VALUES
-                  (TG_TABLE_NAME, NEW.id, a.name, n->(a.name), t);
+                  (d, NEW.id, a.name, n->(a.name), t);
 
               EXCEPTION
               WHEN unique_violation THEN
 
-                -- handle unique violation (constraint: table_name, record_id, column_name)
+                -- handle unique violation (constraint: diffable_type, diffable_id, column_name)
                 -- TODO: notice
                 -- CHEKME
 
@@ -65,9 +67,9 @@ class Create<%= Diffit.function_name.to_s.camelize %> < ActiveRecord::Migration
                   value       = n->(a.name),
                   changed_at  = t
                 WHERE
-                  table_name  = TG_TABLE_NAME AND
-                  record_id   = NEW.id AND
-                  column_name = a.name;
+                  diffable_type  = d AND
+                  diffable_id    = NEW.id AND
+                  column_name    = a.name;
 
               WHEN OTHERS THEN
 
@@ -78,9 +80,9 @@ class Create<%= Diffit.function_name.to_s.camelize %> < ActiveRecord::Migration
                   value       = n->(a.name),
                   changed_at  = t
                 WHERE
-                  table_name  = TG_TABLE_NAME AND
-                  record_id   = NEW.id AND
-                  column_name = a.name;
+                  diffable_type = d AND
+                  diffable_id   = NEW.id AND
+                  column_name   = a.name;
 
               END;
             END IF;
